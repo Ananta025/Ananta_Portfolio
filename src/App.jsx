@@ -14,25 +14,22 @@ function App() {
   let [showContent, setShowContent] = useState(false);
   let [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const mainAnimationsInitialized = useRef(false);
+  const mousePosition = useRef({ x: 0 });
 
-  // Function to update animations based on screen size
   const updateResponsiveAnimations = () => {
     if (!showContent) return;
 
     const currentIsMobile = window.innerWidth < 768;
     setIsMobile(currentIsMobile);
 
-    // Update character position based on current screen size
     gsap.to(".character", {
-      scale: currentIsMobile ? 0.95 : 0.65, 
-      x: "-50%",
+      scale: currentIsMobile ? 0.95 : 0.65,
       bottom: currentIsMobile ? "-15%" : "-83%",
-      duration: 0.5,
-      ease: "Power2.easeOut",
+      duration: 1.2,
+      ease: "power2.inOut",
     });
   };
 
-  // Handle screen size changes
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -45,20 +42,19 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, [showContent]);
 
-  // Initial animations
   useGSAP(() => {
     const tl = gsap.timeline();
 
     tl.to(".vi-mask-group", {
       rotate: 10,
-      duration: 2,
-      ease: "Power4.easeInOut",
+      duration: 2.5,
+      ease: "power3.inOut",
       transformOrigin: "50% 50%",
     }).to(".vi-mask-group", {
       scale: 10,
-      duration: 2,
-      delay: -1.8,
-      ease: "Expo.easeInOut",
+      duration: 2.5,
+      delay: -2,
+      ease: "expo.inOut",
       transformOrigin: "50% 50%",
       opacity: 0,
       onUpdate: function () {
@@ -71,77 +67,93 @@ function App() {
     });
   });
 
-  // Main animations after content is shown
   useGSAP(() => {
     if (!showContent) return;
 
-    gsap.to(".main", {
-      scale: 1,
-      rotate: 0,
-      duration: 2,
-      delay: "-1",
-      ease: "Expo.easeInOut",
-    });
-
-    gsap.to(".sky", {
-      scale: 1.1,
-      rotate: 0,
-      duration: 2,
-      delay: "-.8",
-      ease: "Expo.easeInOut",
-    });
-
-    gsap.to(".bg", {
-      scale: 1.1,
-      rotate: 0,
-      duration: 2,
-      delay: "-.8",
-      ease: "Expo.easeInOut",
-    });
-
-    gsap.to(".character", {
-      scale: isMobile ? 0.95 : 0.65, 
-      x: "-50%",
-      bottom: isMobile ? "-15%" : "-83%",
-      rotate: 0,
-      duration: 2,
-      delay: "-.8",
-      ease: "Expo.easeInOut",
+    const mainTl = gsap.timeline({
+      defaults: {
+        ease: "expo.out",
+        duration: 2.5,
+      },
       onComplete: () => {
         mainAnimationsInitialized.current = true;
       },
     });
 
-    gsap.to(".text", {
-      scale: 1,
-      rotate: 0,
-      duration: 2,
-      delay: "-.8",
-      ease: "Expo.easeInOut",
-    });
+    mainTl
+      .to(".main", {
+        scale: 1,
+        rotate: 0,
+      })
+      .to(
+        [".sky", ".bg"],
+        {
+          scale: 1.1,
+          rotate: 0,
+        },
+        "-=2.3"
+      )
+      .to(
+        ".character",
+        {
+          scale: isMobile ? 0.95 : 0.65,
+          bottom: isMobile ? "-15%" : "-83%",
+          rotate: 0,
+        },
+        "-=2.3"
+      )
+      .to(
+        ".text",
+        {
+          scale: 1,
+          rotate: 0,
+        },
+        "-=2.3"
+      );
 
     const main = document.querySelector(".main");
+    let rafId = null;
 
-    const handleMouseMove = function (e) {
-      const xMove = (e.clientX / window.innerWidth - 0.5) * 40;
+    const updateParallax = () => {
+      const xMove = mousePosition.current.x;
+
       gsap.to(".main .text", {
         x: `${xMove * (isMobile ? 0.2 : 0.4)}%`,
-        duration: 0.3,
+        duration: 0.6,
+        ease: "power1.out",
       });
+
       gsap.to(".sky", {
         x: xMove,
-        duration: 0.3,
+        duration: 0.6,
+        ease: "power1.out",
       });
+
       gsap.to(".bg", {
         x: xMove * 1.7,
-        duration: 0.3,
+        duration: 0.6,
+        ease: "power1.out",
       });
+
+      rafId = null;
+    };
+
+    const handleMouseMove = (e) => {
+      const targetX = (e.clientX / window.innerWidth - 0.5) * 40;
+
+      mousePosition.current.x =
+        mousePosition.current.x + (targetX - mousePosition.current.x) * 0.1;
+
+      if (!rafId) {
+        rafId = requestAnimationFrame(updateParallax);
+      }
     };
 
     main?.addEventListener("mousemove", handleMouseMove);
 
     return () => {
       main?.removeEventListener("mousemove", handleMouseMove);
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, [showContent, isMobile]);
 

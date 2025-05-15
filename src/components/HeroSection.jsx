@@ -7,6 +7,10 @@ const HeroSection = ({ showContent }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const characterRef = useRef(null);
   const textRef = useRef(null);
+  // Store last mouse position for smooth interpolation
+  const mousePosition = useRef({ x: 0 });
+  // Track if this is the first mouse movement
+  const isFirstMove = useRef(true);
   
   // Handle scroll down functionality
   const handleScrollDown = () => {
@@ -16,21 +20,20 @@ const HeroSection = ({ showContent }) => {
     });
   };
 
-  // Set up animations based on current screen size
+  // Set up animations based on current screen size - improved for smoothness
   const setupResponsiveAnimations = () => {
     if (!showContent) return;
     
     const isMobileView = window.innerWidth < 768;
     setIsMobile(isMobileView);
     
-    // Update character position based on screen size
+    // Update character position with smoother transition
     gsap.to(".character", {
       scale: isMobileView ? 0.5 : 0.8,
-      x: "-50%",
-      bottom: isMobileView ? "-35%" : "-85%", // Changed from -95% to -85% for large screens
+      bottom: isMobileView ? "-35%" : "-85%",
       rotate: 0,
-      duration: 0.5,
-      ease: "Power2.easeOut",
+      duration: 1.2,
+      ease: "power2.inOut",
       onComplete: () => {
         if (isMobileView) {
           gsap.set(".character", { visibility: "visible", opacity: 1 });
@@ -38,11 +41,16 @@ const HeroSection = ({ showContent }) => {
       }
     });
     
-    // Update text position based on screen size
+    // Update text position with smoother transition
     gsap.to(".text", {
       top: isMobileView ? "40%" : "20%",
-      duration: 0.5,
-      ease: "Power2.easeOut"
+      duration: 1.2,
+      ease: "power2.inOut"
+    });
+
+    // Initialize text position to center without any x offset
+    gsap.set(".main .text", {
+      x: "0%"
     });
   };
 
@@ -55,84 +63,117 @@ const HeroSection = ({ showContent }) => {
     // Handle resize events
     const handleResize = () => {
       setupResponsiveAnimations();
+      isFirstMove.current = true; // Reset first move flag on resize
     };
     
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [showContent]);
 
-  // Main animations
+  // Main animations with improved sequencing and easing
   useGSAP(() => {
     if (!showContent) return;
 
-    gsap.to(".main", {
-      scale: 1,
-      rotate: 0,
-      duration: 2,
-      delay: "-1",
-      ease: "Expo.easeInOut",
+    // Create a timeline for better sequencing of initial animations
+    const mainTl = gsap.timeline({
+      defaults: {
+        ease: "expo.out",
+        duration: 2.5,
+      }
     });
 
-    gsap.to(".sky", {
-      scale: 1.1,
-      rotate: 0,
-      duration: 2,
-      delay: "-.8",
-      ease: "Expo.easeInOut",
-    });
+    // Sequence the animations with better overlap
+    mainTl
+      .to(".main", {
+        scale: 1,
+        rotate: 0,
+      })
+      .to(".sky", {
+        scale: 1.1,
+        rotate: 0,
+      }, "-=2.3")
+      .to(".bg", {
+        scale: 1.1,
+        rotate: 0,
+      }, "-=2.3")
+      .to(".text", {
+        scale: 1,
+        rotate: 0,
+      }, "-=2.3");
 
-    gsap.to(".bg", {
-      scale: 1.1,
-      rotate: 0,
-      duration: 2,
-      delay: "-.8",
-      ease: "Expo.easeInOut",
-    });
-
-    // Character animation will be handled by setupResponsiveAnimations
-
-    gsap.to(".text", {
-      scale: 1,
-      rotate: 0,
-      duration: 2,
-      delay: "-.8",
-      ease: "Expo.easeInOut",
-    });
-
-    // Mouse scroll animation
+    // Smoother mouse scroll animation
     gsap.to(".mouse-scroll", {
       y: 10,
-      duration: 1,
+      duration: 1.4,
       repeat: -1,
       yoyo: true,
-      ease: "power1.inOut"
+      ease: "sine.inOut"
     });
 
     const main = document.querySelector(".main");
+    let rafId = null;
 
-    // Mouse movement parallax
-    const handleMouseMove = (e) => {
-      const xMove = (e.clientX / window.innerWidth - 0.5) * 40;
+    // Improved mouse movement with interpolation for smoother parallax
+    const updateParallax = () => {
+      const xMove = mousePosition.current.x;
       const parallaxFactor = window.innerWidth < 768 ? 0.2 : 0.4;
       
-      gsap.to(".main .text", {
-        x: `${xMove * parallaxFactor}%`,
-        duration: 0.3
-      });
+      // Different behavior for first mouse move vs. subsequent moves
+      if (isFirstMove.current) {
+        // First move uses a longer duration and different easing for gentler start
+        gsap.to(".main .text", {
+          x: `${xMove * parallaxFactor * 0.3}%`, // Reduced initial movement by 70%
+          duration: 1.2, // Longer duration for first movement
+          ease: "power1.inOut", // Gentler easing for first movement
+          onComplete: () => {
+            isFirstMove.current = false;
+          }
+        });
+      } else {
+        gsap.to(".main .text", {
+          x: `${xMove * parallaxFactor}%`,
+          duration: 0.6,
+          ease: "power1.out"
+        });
+      }
+      
+      // Always animate background elements smoothly
       gsap.to(".sky", {
         x: xMove,
-        duration: 0.3
+        duration: 0.6,
+        ease: "power1.out"
       });
+      
       gsap.to(".bg", {
         x: xMove * 1.7,
-        duration: 0.3
+        duration: 0.6,
+        ease: "power1.out"
       });
+      
+      rafId = null;
+    };
+    
+    // Use requestAnimationFrame for smoother mouse tracking
+    const handleMouseMove = (e) => {
+      // Calculate target position
+      const targetX = (e.clientX / window.innerWidth - 0.5) * 40;
+      
+      // Gentler interpolation for first move
+      const interpolationFactor = isFirstMove.current ? 0.05 : 0.1;
+      
+      // Add some interpolation for smoother movement
+      mousePosition.current.x = mousePosition.current.x + (targetX - mousePosition.current.x) * interpolationFactor;
+      
+      if (!rafId) {
+        rafId = requestAnimationFrame(updateParallax);
+      }
     };
     
     main?.addEventListener("mousemove", handleMouseMove);
     
     return () => {
       main?.removeEventListener("mousemove", handleMouseMove);
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, [showContent]);
 
