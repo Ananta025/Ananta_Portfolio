@@ -59,22 +59,22 @@ export default function SkillSection() {
   };
 
   return (
-    <section id="skills" className="bg-black text-gray-100 py-20 relative overflow-hidden">
+    <section id="skills" className="bg-black text-gray-100 py-12 sm:py-16 md:py-20 relative overflow-hidden">
       {/* Background elements - updated to match other sections */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-blue-500 filter blur-3xl"></div>
-        <div className="absolute bottom-10 right-10 w-40 h-40 rounded-full bg-purple-500 filter blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/3 w-24 h-24 rounded-full bg-teal-400 filter blur-2xl"></div>
+        <div className="absolute top-10 left-10 w-24 sm:w-32 h-24 sm:h-32 rounded-full bg-blue-500 filter blur-3xl"></div>
+        <div className="absolute bottom-10 right-10 w-28 sm:w-40 h-28 sm:h-40 rounded-full bg-purple-500 filter blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/3 w-16 sm:w-24 h-16 sm:h-24 rounded-full bg-teal-400 filter blur-2xl"></div>
       </div>
       
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-xs sm:max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-10 sm:mb-16"
         >
-          <h2 className="text-6xl font-['Bebas_Neue'] text-white tracking-wider relative inline-block">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-['Bebas_Neue'] text-white tracking-wider relative inline-block">
             SKILLS
             <motion.span
               initial={{ width: "0%" }}
@@ -83,19 +83,19 @@ export default function SkillSection() {
               className="absolute -bottom-2 left-0 h-1 bg-[#F0C56D]"
             />
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto mt-4 font-['Rubik']">
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mt-4 font-['Rubik'] px-2">
             Technologies and tools I've mastered throughout my development journey
           </p>
         </motion.div>
 
-        <div className="space-y-16">
+        <div className="space-y-10 sm:space-y-12 md:space-y-16">
           {Object.entries(skills).map(([category, categorySkills]) => (
-            <div key={category} className="mb-12">
+            <div key={category} className="mb-8 md:mb-12">
               <motion.h3
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5 }}
-                className="text-2xl font-medium text-gray-200 mb-8 text-center font-['Rubik']"
+                className="text-xl sm:text-2xl font-medium text-gray-200 mb-6 sm:mb-8 text-center font-['Rubik']"
               >
                 {category}
               </motion.h3>
@@ -104,7 +104,7 @@ export default function SkillSection() {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="flex flex-wrap justify-center gap-6"
+                className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-6"
               >
                 {categorySkills.map((skill) => (
                   <motion.div
@@ -113,13 +113,13 @@ export default function SkillSection() {
                     whileHover="hover"
                     className="group"
                   >
-                    <div className="w-28 h-36 bg-[#111111] rounded-lg overflow-hidden flex flex-col items-center justify-center relative shadow-lg shadow-black/50 border border-gray-800 hover:border-[#3A3A3A] transition-all duration-300">
+                    <div className="w-[85px] h-[110px] sm:w-24 sm:h-32 md:w-28 md:h-36 bg-[#111111] rounded-lg overflow-hidden flex flex-col items-center justify-center relative shadow-lg shadow-black/50 border border-gray-800 hover:border-[#3A3A3A] transition-all duration-300">
                       {/* Glowing effect on hover */}
                       <div className="absolute inset-0 bg-gradient-to-br from-blue-600/0 to-purple-600/0 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                       
                       {/* Icon */}
                       <div 
-                        className="w-16 h-16 rounded-lg flex items-center justify-center text-2xl font-bold mb-3"
+                        className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg flex items-center justify-center text-base sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3"
                         style={{ 
                           backgroundColor: skill.color,
                           color: skill.textColor,
@@ -130,16 +130,16 @@ export default function SkillSection() {
                       </div>
                       
                       {/* Name */}
-                      <div className="text-gray-300 text-sm font-medium text-center font-['Rubik']">
+                      <div className="text-gray-300 text-xs sm:text-sm font-medium text-center font-['Rubik'] px-1">
                         {skill.name}
                       </div>
 
-                      {/* Decorative corner borders on hover - like in ProjectSection */}
+                      {/* Decorative corner borders on hover */}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                        <div className="absolute top-0 left-0 w-12 h-1 bg-[#F0C56D] transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
-                        <div className="absolute top-0 left-0 w-1 h-12 bg-[#F0C56D] transform origin-top scale-y-0 group-hover:scale-y-100 transition-transform duration-500 ease-out"></div>
-                        <div className="absolute bottom-0 right-0 w-12 h-1 bg-[#F0C56D] transform origin-right scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
-                        <div className="absolute bottom-0 right-0 w-1 h-12 bg-[#F0C56D] transform origin-bottom scale-y-0 group-hover:scale-y-100 transition-transform duration-500 ease-out"></div>
+                        <div className="absolute top-0 left-0 w-8 sm:w-10 md:w-12 h-1 bg-[#F0C56D] transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
+                        <div className="absolute top-0 left-0 w-1 h-8 sm:h-10 md:h-12 bg-[#F0C56D] transform origin-top scale-y-0 group-hover:scale-y-100 transition-transform duration-500 ease-out"></div>
+                        <div className="absolute bottom-0 right-0 w-8 sm:w-10 md:w-12 h-1 bg-[#F0C56D] transform origin-right scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
+                        <div className="absolute bottom-0 right-0 w-1 h-8 sm:h-10 md:h-12 bg-[#F0C56D] transform origin-bottom scale-y-0 group-hover:scale-y-100 transition-transform duration-500 ease-out"></div>
                       </div>
                     </div>
                   </motion.div>
