@@ -7,12 +7,9 @@ const HeroSection = ({ showContent }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const characterRef = useRef(null);
   const textRef = useRef(null);
-  // Store last mouse position for smooth interpolation
   const mousePosition = useRef({ x: 0 });
-  // Track if this is the first mouse movement
   const isFirstMove = useRef(true);
   
-  // Handle scroll down functionality
   const handleScrollDown = () => {
     window.scrollTo({
       top: window.innerHeight,
@@ -20,35 +17,49 @@ const HeroSection = ({ showContent }) => {
     });
   };
 
-  // Set up animations based on current screen size - improved for smoothness
+  // Improved setupResponsiveAnimations function for better small screen handling
   const setupResponsiveAnimations = () => {
     if (!showContent) return;
     
     const isMobileView = window.innerWidth < 768;
+    const isSmallScreen = window.innerWidth < 480;
     setIsMobile(isMobileView);
     
-    // Update character position with smoother transition
-    gsap.to(".character", {
-      scale: isMobileView ? 0.5 : 0.8,
-      bottom: isMobileView ? "-35%" : "-85%",
-      rotate: 0,
-      duration: 1.2,
-      ease: "power2.inOut",
-      onComplete: () => {
-        if (isMobileView) {
-          gsap.set(".character", { visibility: "visible", opacity: 1 });
-        }
+    // Use visibility instead of opacity for smoother transition
+    gsap.set(".character", { 
+      visibility: "visible",
+      left: "50%",
+      xPercent: -50
+    });
+    
+    // Create the main animation timeline with better mobile values
+    const mainTl = gsap.timeline({
+      defaults: {
+        ease: "expo.inOut",
+        duration: 2,
       }
     });
     
-    // Update text position with smoother transition
-    gsap.to(".text", {
-      top: isMobileView ? "40%" : "20%",
-      duration: 1.2,
-      ease: "power2.inOut"
-    });
-
-    // Initialize text position to center without any x offset
+    // More specific animation values based on screen size
+    mainTl.to(".character", {
+      // Handle extra small, mobile, and desktop screens differently
+      scale: isSmallScreen ? 0.7 : (isMobileView ? 0.95 : 0.61),
+      bottom: isSmallScreen ? "0%" : (isMobileView ? "-5%" : "-39%"),
+      rotate: 0,
+      ease: "expo.inOut",
+      duration: 2,
+    }, 0);
+    
+    // Update text position in parallel with better mobile values
+    mainTl.to(".text", {
+      top: isSmallScreen ? "35%" : (isMobileView ? "40%" : "20%"),
+      left: "50%", 
+      xPercent: -50,
+      ease: "expo.inOut",
+      duration: 2,
+    }, 0);
+    
+    // Ensure text stays centered initially
     gsap.set(".main .text", {
       x: "0%"
     });
@@ -58,16 +69,21 @@ const HeroSection = ({ showContent }) => {
   useEffect(() => {
     if (!showContent) return;
     
-    setupResponsiveAnimations();
+    // Add a slight delay to ensure this runs after App.jsx animations
+    const timer = setTimeout(() => {
+      setupResponsiveAnimations();
+    }, 100);
     
-    // Handle resize events
     const handleResize = () => {
       setupResponsiveAnimations();
-      isFirstMove.current = true; // Reset first move flag on resize
+      isFirstMove.current = true;
     };
     
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timer);
+    };
   }, [showContent]);
 
   // Main animations with improved sequencing and easing
@@ -196,16 +212,18 @@ const HeroSection = ({ showContent }) => {
           ref={textRef}
           className="text text-white flex flex-col gap-1 sm:gap-2 md:gap-3 absolute top-[40%] sm:top-14 md:top-20 left-1/2 -translate-x-1/2 -translate-y-1/2 sm:-translate-y-0 scale-[1.4] rotate-[-10deg]"
         >
-          <h1 className="text-[4rem] sm:text-[5rem] md:text-[7rem] lg:text-[9rem] leading-none -ml-10 sm:-ml-20 md:-ml-40">grand</h1>
-          <h1 className="text-[4rem] sm:text-[5rem] md:text-[7rem] lg:text-[9rem] leading-none ml-5 sm:ml-10 md:ml-20">theft</h1>
-          <h1 className="text-[4rem] sm:text-[5rem] md:text-[7rem] lg:text-[9rem] leading-none -ml-10 sm:-ml-20 md:-ml-40">auto</h1>
+          <h1 className="text-[4rem] sm:text-[5rem] md:text-[7rem] lg:text-[9rem] leading-none -ml-10 sm:-ml-20 md:-ml-40 opacity-95">grand</h1>
+          <h1 className="text-[4rem] sm:text-[5rem] md:text-[7rem] lg:text-[9rem] leading-none ml-5 sm:ml-10 md:ml-20 opacity-95">theft</h1>
+          <h1 className="text-[4rem] sm:text-[5rem] md:text-[7rem] lg:text-[9rem] leading-none -ml-10 sm:-ml-20 md:-ml-40 opacity-95">auto</h1>
         </div>
         <img
           ref={characterRef}
-          className="absolute character -bottom-[65%] sm:-bottom-[160%] left-1/2 -translate-x-1/2 scale-[2.5] sm:scale-[3] rotate-[-20deg]"
+          className="absolute character -bottom-[80%] sm:-bottom-[100%] md:-bottom-[120%] left-1/2 -translate-x-1/2 scale-[1.5] sm:scale-[1.8] md:scale-[2] rotate-[-20deg]"
           src="./boy.png"
           alt=""
-          style={{ visibility: 'visible' }}
+          style={{ 
+            transformOrigin: "center bottom"
+          }}
         />
       </div>
       <div className="btmbar text-white absolute bottom-0 left-0 w-full py-5 sm:py-10 md:py-15 px-4 sm:px-6 md:px-10 bg-gradient-to-t from-black to-transparent">

@@ -22,12 +22,8 @@ function App() {
     const currentIsMobile = window.innerWidth < 768;
     setIsMobile(currentIsMobile);
 
-    gsap.to(".character", {
-      scale: currentIsMobile ? 0.95 : 0.65,
-      bottom: currentIsMobile ? "-15%" : "-83%",
-      duration: 1.2,
-      ease: "power2.inOut",
-    });
+    // Don't animate character position here, let HeroSection handle it
+    // This avoids conflicts between the two components
   };
 
   useEffect(() => {
@@ -92,24 +88,26 @@ function App() {
           rotate: 0,
         },
         "-=2.3"
-      )
-      .to(
-        ".character",
-        {
-          scale: isMobile ? 0.95 : 0.65,
-          bottom: isMobile ? "-15%" : "-83%",
-          rotate: 0,
-        },
-        "-=2.3"
-      )
-      .to(
-        ".text",
-        {
-          scale: 1,
-          rotate: 0,
-        },
-        "-=2.3"
       );
+    // Remove or comment out the character and text animations from here
+    // Let HeroSection handle them instead
+    // .to(
+    //   ".character",
+    //   {
+    //     scale: isMobile ? 0.95 : 0.65,
+    //     bottom: isMobile ? "-15%" : "-83%",
+    //     rotate: 0,
+    //   },
+    //   "-=2.3"
+    // )
+    // .to(
+    //   ".text",
+    //   {
+    //     scale: 1,
+    //     rotate: 0,
+    //   },
+    //   "-=2.3"
+    // );
 
     const main = document.querySelector(".main");
     let rafId = null;

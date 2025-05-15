@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 
 export default function SkillSection() {
   const skills = {
@@ -60,7 +60,7 @@ export default function SkillSection() {
 
   return (
     <section id="skills" className="bg-black text-gray-100 py-12 sm:py-16 md:py-20 relative overflow-hidden">
-      {/* Background elements - updated to match other sections */}
+      {/* Background elements - unchanged */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-10 left-10 w-24 sm:w-32 h-24 sm:h-32 rounded-full bg-blue-500 filter blur-3xl"></div>
         <div className="absolute bottom-10 right-10 w-28 sm:w-40 h-28 sm:h-40 rounded-full bg-purple-500 filter blur-3xl"></div>
@@ -89,12 +89,20 @@ export default function SkillSection() {
         </motion.div>
 
         <div className="space-y-10 sm:space-y-12 md:space-y-16">
-          {Object.entries(skills).map(([category, categorySkills]) => (
-            <div key={category} className="mb-8 md:mb-12">
+          {Object.entries(skills).map(([category, categorySkills], categoryIndex) => (
+            <motion.div 
+              key={category} 
+              className="mb-8 md:mb-12"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: categoryIndex * 0.1 }}
+              viewport={{ once: true, amount: 0.2 }}
+            >
               <motion.h3
                 initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
                 className="text-xl sm:text-2xl font-medium text-gray-200 mb-6 sm:mb-8 text-center font-['Rubik']"
               >
                 {category}
@@ -103,13 +111,15 @@ export default function SkillSection() {
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
-                animate="visible"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.1 }}
                 className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-6"
               >
-                {categorySkills.map((skill) => (
+                {categorySkills.map((skill, index) => (
                   <motion.div
                     key={skill.name}
                     variants={itemVariants}
+                    custom={index}
                     whileHover="hover"
                     className="group"
                   >
@@ -118,23 +128,28 @@ export default function SkillSection() {
                       <div className="absolute inset-0 bg-gradient-to-br from-blue-600/0 to-purple-600/0 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                       
                       {/* Icon */}
-                      <div 
+                      <motion.div 
                         className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg flex items-center justify-center text-base sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3"
                         style={{ 
                           backgroundColor: skill.color,
                           color: skill.textColor,
                           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)"
                         }}
+                        whileInView={{ 
+                          scale: [0.8, 1.05, 1],
+                          transition: { delay: index * 0.04, duration: 0.5 }
+                        }}
+                        viewport={{ once: true }}
                       >
                         {skill.icon}
-                      </div>
+                      </motion.div>
                       
                       {/* Name */}
                       <div className="text-gray-300 text-xs sm:text-sm font-medium text-center font-['Rubik'] px-1">
                         {skill.name}
                       </div>
 
-                      {/* Decorative corner borders on hover */}
+                      {/* Decorative corner borders on hover - unchanged */}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
                         <div className="absolute top-0 left-0 w-8 sm:w-10 md:w-12 h-1 bg-[#F0C56D] transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
                         <div className="absolute top-0 left-0 w-1 h-8 sm:h-10 md:h-12 bg-[#F0C56D] transform origin-top scale-y-0 group-hover:scale-y-100 transition-transform duration-500 ease-out"></div>
@@ -145,7 +160,7 @@ export default function SkillSection() {
                   </motion.div>
                 ))}
               </motion.div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

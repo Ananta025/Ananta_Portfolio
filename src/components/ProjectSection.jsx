@@ -29,8 +29,8 @@ const FilterBar = ({ filters, activeFilter, setActiveFilter }) => {
   );
 };
 
-// Enhanced ProjectCard subcomponent with responsive design
-const ProjectCard = ({ project }) => {
+// Enhanced ProjectCard with scroll appearance animations
+const ProjectCard = ({ project, index }) => {
   const videoRef = useRef(null);
 
   // Handle mouse enter/leave for video playback
@@ -52,10 +52,15 @@ const ProjectCard = ({ project }) => {
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, scale: 0.9, y: 30 }}
+      whileInView={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.4 }}
+      transition={{ 
+        duration: 0.8, 
+        delay: index * 0.2, // Staggered delay based on card index
+        ease: "easeOut" 
+      }}
+      viewport={{ once: true, amount: 0.2 }}
       className="relative h-[280px] sm:h-[320px] md:h-[340px] lg:h-[360px] rounded-xl sm:rounded-2xl overflow-hidden group cursor-pointer border border-[#333333] hover:border-[#444444] transition-colors duration-300"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -236,11 +241,11 @@ const ProjectSection = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.5 }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
           >
-            {filteredProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+            {filteredProjects.map((project, index) => (
+              <ProjectCard key={project.id} project={project} index={index} />
             ))}
           </motion.div>
         </AnimatePresence>

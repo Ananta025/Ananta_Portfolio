@@ -4,13 +4,13 @@ import { MdEmail } from "react-icons/md";
 
 const AboutSection = () => {
   return (
-    <div id="about" className="w-full min-h-screen py-12 md:py-0 flex items-center justify-center bg-black">
+    <div id="about" className="w-full min-h-screen py-20 md:py-0 flex items-center justify-center bg-black">
       <div className="cntnr flex flex-col md:flex-row text-white w-full max-w-7xl px-4">
         {/* Image - adjusted positioning for big screens */}
-        <div className="limg relative w-full md:w-[45%] h-64 sm:h-80 md:h-auto md:flex md:items-center md:justify-center mb-8 md:mb-0">
+        <div className="limg relative w-full md:w-[45%] h-72 sm:h-80 md:h-auto md:flex md:items-center md:justify-center mb-14 md:mb-0">
           <div className="relative w-full h-full md:h-[80%]">
             <img
-              className="absolute scale-[0.5] sm:scale-[0.55] md:scale-[0.6] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+              className="absolute scale-[0.7] sm:scale-[0.65] md:scale-[0.6] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
               src="./boy-char.png"
               alt="Character avatar"
             />
@@ -18,8 +18,8 @@ const AboutSection = () => {
         </div>
         
         {/* Icons - horizontal on mobile, vertical on larger screens */}
-        <div className="flex justify-center md:flex-col md:justify-center md:items-center w-full md:w-[8%] mb-8 md:mb-0">
-          <div className="flex flex-row md:flex-col gap-6 md:gap-8">
+        <div className="flex justify-center md:flex-col md:justify-center md:items-center w-full md:w-[8%] mb-14 md:mb-0">
+          <div className="flex flex-row md:flex-col gap-8 md:gap-8">
             <a href="https://www.linkedin.com/in/ananta-chandra-das/" className="text-xl text-gray-300 hover:text-white transition-colors">
               <FaLinkedin />
             </a>
