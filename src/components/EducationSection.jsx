@@ -26,7 +26,7 @@ export default function EducationSection() {
       title: "SPECIALIZED CERTIFICATIONS",
       color: "bg-orange-500",
       icon: "📜",
-      duration: "2022 - Present",
+      duration: "2023 - 2024",
       content: (
         <>
           <p className="font-medium">Advanced technical skills validation</p>
@@ -43,7 +43,7 @@ export default function EducationSection() {
       color: "bg-purple-500",
       icon: "🏫",
       institution: "RCC Institute of Information Technology",
-      duration: "2018 - 2020",
+      duration: "2023 - 2027",
       content: (
         <>
           <p className="font-medium">Specialized in Computer Science & Mathematics</p>
