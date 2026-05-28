@@ -201,8 +201,8 @@ export default function EducationSection() {
 
         if (iconGlow) {
           gsap.to(iconGlow, {
-            opacity: 1,
-            scale: 1.18,
+            opacity: 0.75,
+            scale: 0.75,
             duration: 0.3,
             ease: "power2.out",
           });
@@ -212,8 +212,8 @@ export default function EducationSection() {
           gsap.set(iconPulse, { opacity: 0.34, scale: 0.92 });
           gsap.to(iconPulse, {
             opacity: 0,
-            scale: 1.8,
-            duration: 1.6,
+            scale: 1.5,
+            duration: 1.4,
             ease: "power1.out",
             repeat: -1,
             repeatDelay: 0.35,
@@ -245,7 +245,7 @@ export default function EducationSection() {
       if (iconGlow) {
         gsap.to(iconGlow, {
           opacity: 0,
-          scale: 0.94,
+          scale: 0.9,
           duration: 0.25,
           ease: "power2.out",
         });
@@ -605,7 +605,7 @@ function TimelineItem({ item, iconRef, glowRef, pulseRef, isEven, isLast }) {
       >
         <div
           ref={iconRef}
-          className="relative flex h-8 w-8 items-center justify-center overflow-visible rounded-full border border-white/10 bg-white/5 text-white/40 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl transition-colors duration-300 sm:h-11 sm:w-11 md:h-14 md:w-14"
+          className="relative flex h-10 w-10 items-center justify-center overflow-visible rounded-full border border-white/10 bg-white/5 text-white/40 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl transition-colors duration-300 sm:h-11 sm:w-11 md:h-[3rem] md:w-[3rem] lg:h-[3.1rem] lg:w-[3.1rem]"
         >
           <div
             ref={glowRef}
