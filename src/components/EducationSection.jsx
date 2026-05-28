@@ -1,14 +1,30 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import gsap from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
+import Lenis from "lenis";
+import { Award, Briefcase, Code2, GraduationCap, Trophy } from "lucide-react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function EducationSection() {
-  // Define education items
+  const sectionRef = useRef(null);
+  const timelineContainerRef = useRef(null);
+  const lineTrackRef = useRef(null);
+  const lineFillRef = useRef(null);
+  const lineGlowRef = useRef(null);
+  const iconRefs = useRef([]);
+  const iconGlowRefs = useRef([]);
+  const iconPulseRefs = useRef([]);
+  const activatedIconsRef = useRef(new Set());
+
   const educationItems = [
     {
       title: "HIGHER SECONDARY EDUCATION",
       color: "bg-blue-500",
-      icon: "👨‍🎓",
+      icon: GraduationCap,
+      activeColor: "#F0C56D",
       institution: "Barabisha High School (H.S)",
       duration: "2020 - 2022",
       content: (
@@ -25,7 +41,8 @@ export default function EducationSection() {
     {
       title: "SPECIALIZED CERTIFICATIONS",
       color: "bg-orange-500",
-      icon: "📜",
+      icon: Award,
+      activeColor: "#6EA8FF",
       duration: "2023 - 2024",
       content: (
         <>
@@ -41,7 +58,8 @@ export default function EducationSection() {
     {
       title: "COMPUTER SCIENCE & ENGINEERING",
       color: "bg-purple-500",
-      icon: "🏫",
+      icon: Briefcase,
+      activeColor: "#F0C56D",
       institution: "RCC Institute of Information Technology",
       duration: "2023 - 2027",
       content: (
@@ -58,7 +76,8 @@ export default function EducationSection() {
     {
       title: "TECHNICAL WORKSHOPS",
       color: "bg-green-500",
-      icon: "👨‍💻",
+      icon: Code2,
+      activeColor: "#6EA8FF",
       duration: "2021 - 2023",
       content: (
         <>
@@ -74,7 +93,8 @@ export default function EducationSection() {
     {
       title: "HACKATHONS & PROJECTS",
       color: "bg-teal-500",
-      icon: "🧩",
+      icon: Trophy,
+      activeColor: "#F0C56D",
       duration: "2023 - Present",
       content: (
         <>
@@ -89,8 +109,359 @@ export default function EducationSection() {
     }
   ];
 
+  useEffect(() => {
+    if (
+      !sectionRef.current ||
+      !timelineContainerRef.current ||
+      !lineTrackRef.current ||
+      !lineFillRef.current ||
+      !lineGlowRef.current ||
+      !iconRefs.current.length
+    ) {
+      return undefined;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       Collect all cleanup handles so we can tear down
+       everything in one place, even if init is deferred.
+       ═══════════════════════════════════════════════════ */
+    let ctx = null;
+    let lenis = null;
+    let resizeObserver = null;
+    let rafId = null;
+    const deferredTimers = [];
+    let destroyed = false;
+
+    /* ────────── helpers ────────── */
+
+    /** Get the Y center of an icon relative to the timeline container */
+    const getIconCenterY = (index) => {
+      const icon = iconRefs.current[index];
+      const container = timelineContainerRef.current;
+      if (!icon || !container) return 0;
+      const containerRect = container.getBoundingClientRect();
+      const iconRect = icon.getBoundingClientRect();
+      return iconRect.top + iconRect.height / 2 - containerRect.top;
+    };
+
+    const getFirstIconTop = () => getIconCenterY(0);
+    const getLastIconBottom = () => getIconCenterY(educationItems.length - 1);
+
+    /** Position the dark track to span first→last icon exactly */
+    const positionLine = () => {
+      const topY = getFirstIconTop();
+      const bottomY = getLastIconBottom();
+      const height = bottomY - topY;
+
+      const track = lineTrackRef.current;
+      if (!track || height <= 0) return;
+      track.style.top = `${topY}px`;
+      track.style.height = `${height}px`;
+      track.style.bottom = "auto";
+    };
+
+    /** Recompute line position + refresh ScrollTrigger in one call */
+    const recalculate = () => {
+      if (destroyed) return;
+      positionLine();
+      onScrollUpdate();
+      ScrollTrigger.refresh();
+    };
+
+    /* ────────── icon state ────────── */
+
+    const setIconState = (index, active) => {
+      const iconContainer = iconRefs.current[index];
+      const iconGlow = iconGlowRefs.current[index];
+      const iconPulse = iconPulseRefs.current[index];
+      const icon = iconContainer?.querySelector("svg");
+      const activeColor = educationItems[index]?.activeColor ?? "#F0C56D";
+
+      if (!iconContainer || !icon) return;
+
+      if (active) {
+        gsap.killTweensOf([iconContainer, iconGlow, iconPulse, icon]);
+
+        gsap.to(iconContainer, {
+          scale: 1.12,
+          y: -1,
+          borderColor: activeColor,
+          backgroundColor: "rgba(255, 255, 255, 0.1)",
+          boxShadow:
+            "0 0 0 1px rgba(255,255,255,0.08), 0 0 24px rgba(240, 197, 109, 0.24)",
+          duration: 0.3,
+          ease: "power2.out",
+        });
+
+        gsap.to(icon, {
+          color: activeColor,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+
+        if (iconGlow) {
+          gsap.to(iconGlow, {
+            opacity: 1,
+            scale: 1.18,
+            duration: 0.3,
+            ease: "power2.out",
+          });
+        }
+
+        if (iconPulse) {
+          gsap.set(iconPulse, { opacity: 0.34, scale: 0.92 });
+          gsap.to(iconPulse, {
+            opacity: 0,
+            scale: 1.8,
+            duration: 1.6,
+            ease: "power1.out",
+            repeat: -1,
+            repeatDelay: 0.35,
+          });
+        }
+
+        return;
+      }
+
+      /* Deactivate */
+      gsap.killTweensOf([iconContainer, iconGlow, iconPulse, icon]);
+
+      gsap.to(iconContainer, {
+        scale: 1,
+        y: 0,
+        borderColor: "rgba(255, 255, 255, 0.12)",
+        backgroundColor: "rgba(255, 255, 255, 0.05)",
+        boxShadow: "0 0 0 1px rgba(255,255,255,0.04)",
+        duration: 0.25,
+        ease: "power2.out",
+      });
+
+      gsap.to(icon, {
+        color: "rgba(255, 255, 255, 0.42)",
+        duration: 0.25,
+        ease: "power2.out",
+      });
+
+      if (iconGlow) {
+        gsap.to(iconGlow, {
+          opacity: 0,
+          scale: 0.94,
+          duration: 0.25,
+          ease: "power2.out",
+        });
+      }
+
+      if (iconPulse) {
+        gsap.set(iconPulse, { opacity: 0, scale: 0.92 });
+      }
+    };
+
+    /* ────────── viewport-driven scroll logic ────────── */
+
+    /**
+     * On each scroll frame, we compute how far the "trigger line" (at 60% viewport
+     * height) has traveled past the first icon, clamped to the last icon.
+     * The fill height is set directly. Icons activate the instant the trigger
+     * crosses their center — no delayed thresholds.
+     */
+    const onScrollUpdate = () => {
+      const container = timelineContainerRef.current;
+      const fill = lineFillRef.current;
+      const glow = lineGlowRef.current;
+      if (!container || !fill || !glow) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const viewportTriggerY = window.innerHeight * 0.6;
+
+      // How far the viewport trigger is into the container
+      const triggerInContainer = viewportTriggerY - containerRect.top;
+
+      const firstY = getFirstIconTop();
+      const lastY = getLastIconBottom();
+      const totalHeight = lastY - firstY;
+
+      if (totalHeight <= 0) return;
+
+      // Clamp the fill between 0 and total track height
+      const rawFill = triggerInContainer - firstY;
+      const clampedFill = Math.max(0, Math.min(rawFill, totalHeight));
+      const progress = clampedFill / totalHeight;
+
+      // Set fill and glow height directly (no scaleY)
+      fill.style.height = `${clampedFill}px`;
+      glow.style.height = `${clampedFill}px`;
+
+      // Activate/deactivate icons based on whether the trigger has reached them
+      for (let i = 0; i < educationItems.length; i++) {
+        const iconY = getIconCenterY(i);
+        const iconFraction = (iconY - firstY) / totalHeight;
+        const isReached = progress >= iconFraction - 0.005;
+        const wasActive = activatedIconsRef.current.has(i);
+
+        if (isReached && !wasActive) {
+          activatedIconsRef.current.add(i);
+          setIconState(i, true);
+        } else if (!isReached && wasActive) {
+          activatedIconsRef.current.delete(i);
+          setIconState(i, false);
+        }
+      }
+    };
+
+    /* ═══════════════════════════════════════════════════
+       Main initialization — deferred until layout is stable
+       ═══════════════════════════════════════════════════ */
+    const initTimeline = () => {
+      if (destroyed) return;
+
+      /* Reset icons to inactive */
+      iconRefs.current.forEach((_, index) => setIconState(index, false));
+      activatedIconsRef.current.clear();
+
+      /* Set fill to height-based approach */
+      gsap.set([lineFillRef.current, lineGlowRef.current], {
+        height: 0,
+        scaleY: 1,
+        transformOrigin: "top center",
+      });
+
+      /* Measure & position after layout is finalized */
+      positionLine();
+
+      /* ── Lenis smooth scroll ── */
+      lenis = new Lenis({
+        lerp: 0.08,
+        smoothWheel: true,
+        smoothTouch: false,
+      });
+
+      const onLenisScroll = () => {
+        ScrollTrigger.update();
+      };
+
+      lenis.on("scroll", onLenisScroll);
+
+      const raf = (time) => {
+        lenis.raf(time * 1000);
+      };
+
+      gsap.ticker.add(raf);
+
+      /* ── ScrollTrigger ── */
+      ctx = gsap.context(() => {
+        ScrollTrigger.create({
+          trigger: sectionRef.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+          onUpdate: () => {
+            onScrollUpdate();
+          },
+          onRefresh: () => {
+            positionLine();
+            onScrollUpdate();
+          },
+        });
+      }, sectionRef);
+
+      /* ── ResizeObserver — catches container-level layout changes
+            (responsive breakpoints, content reflow, etc.) ── */
+      let resizeDebounce = null;
+      resizeObserver = new ResizeObserver(() => {
+        if (resizeDebounce) clearTimeout(resizeDebounce);
+        resizeDebounce = setTimeout(() => {
+          if (!destroyed) recalculate();
+        }, 100);
+      });
+      resizeObserver.observe(timelineContainerRef.current);
+
+      /* ── Window resize ── */
+      const onResize = () => {
+        recalculate();
+      };
+      window.addEventListener("resize", onResize);
+
+      /* Initial refresh */
+      ScrollTrigger.refresh();
+
+      /* ── Staggered deferred refreshes to catch late layout shifts
+            (images loading, lazy content, etc.) ── */
+      [200, 600, 1200].forEach((delay) => {
+        const t = setTimeout(() => {
+          if (!destroyed) recalculate();
+        }, delay);
+        deferredTimers.push(t);
+      });
+
+      /* Store resize handler ref for cleanup */
+      initTimeline._onResize = onResize;
+      initTimeline._raf = raf;
+      initTimeline._onLenisScroll = onLenisScroll;
+    };
+
+    /* ═══════════════════════════════════════════════════
+       Wait for fonts + one rAF frame before initializing.
+       This ensures getBoundingClientRect() returns accurate
+       values on first load and on hard refresh.
+       ═══════════════════════════════════════════════════ */
+    const fontsReady = document.fonts?.ready ?? Promise.resolve();
+
+    fontsReady.then(() => {
+      if (destroyed) return;
+      // Double-rAF: first rAF waits for the browser to
+      // commit the font-swapped layout, second rAF ensures
+      // a full paint cycle has occurred before measuring.
+      rafId = requestAnimationFrame(() => {
+        rafId = requestAnimationFrame(() => {
+          initTimeline();
+        });
+      });
+    });
+
+    /* ═══════════════════════════════════════════════════
+       Cleanup
+       ═══════════════════════════════════════════════════ */
+    return () => {
+      destroyed = true;
+
+      /* Cancel deferred timers */
+      deferredTimers.forEach(clearTimeout);
+
+      /* Cancel pending rAF */
+      if (rafId) cancelAnimationFrame(rafId);
+
+      /* GSAP context */
+      if (ctx) ctx.revert();
+
+      /* GSAP ticker */
+      if (initTimeline._raf) gsap.ticker.remove(initTimeline._raf);
+
+      /* Lenis */
+      if (lenis) {
+        if (initTimeline._onLenisScroll) {
+          lenis.off("scroll", initTimeline._onLenisScroll);
+        }
+        lenis.destroy();
+      }
+
+      /* ResizeObserver */
+      if (resizeObserver) resizeObserver.disconnect();
+
+      /* Window resize */
+      if (initTimeline._onResize) {
+        window.removeEventListener("resize", initTimeline._onResize);
+      }
+
+      activatedIconsRef.current.clear();
+    };
+  }, []);
+
   return (
-    <section id="education" className="bg-black text-gray-100 py-12 sm:py-16 md:py-20 relative overflow-hidden">
+    <section
+      id="education"
+      ref={sectionRef}
+      className="bg-black text-gray-100 py-12 sm:py-16 md:py-20 relative overflow-hidden"
+    >
       {/* Background elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-blue-500 filter blur-3xl"></div>
@@ -103,7 +474,7 @@ export default function EducationSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-10 md:mb-16"
+          className="text-center mb-8 md:mb-16"
         >
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-['Bebas_Neue'] text-white tracking-wider relative inline-block">
             EDUCATION
@@ -119,22 +490,53 @@ export default function EducationSection() {
           </p>
         </motion.div>
 
-        <div className="relative">
-          {/* Vertical timeline line - responsive positioning */}
-          <div 
-            className="absolute left-4 md:left-1/2 transform md:-translate-x-1/2 w-1 bg-gray-700"
-            style={{ 
-              top: '8px',
-              height: window.innerWidth < 768 ? 'calc(100% - 185px)' : 'calc(100% - 225px)'
-            }}
-          ></div>
+        <div className="relative mt-20" aria-label="Education timeline" ref={timelineContainerRef}>
+          {/* Vertical timeline line — track spans first→last icon only */}
+          <div
+            ref={lineTrackRef}
+            aria-hidden="true"
+            className="pointer-events-none absolute left-4 md:left-1/2 md:-translate-x-1/2 w-px md:w-[3px]"
+            style={{ top: 0, height: 0 }}
+          >
+            {/* Dark inactive track */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/5 via-white/10 to-white/5" />
+            {/* Active gold fill */}
+            <div
+              ref={lineFillRef}
+              className="absolute top-0 left-0 right-0 rounded-full will-change-transform"
+              style={{
+                height: 0,
+                background: "linear-gradient(to bottom, #FFF7E4, #F0C56D 50%, #D4A94E)",
+                boxShadow: "0 0 14px rgba(240, 197, 109, 0.5), 0 0 40px rgba(240, 197, 109, 0.2)",
+              }}
+            />
+            {/* Glow overlay */}
+            <div
+              ref={lineGlowRef}
+              className="absolute top-0 left-0 right-0 rounded-full will-change-transform"
+              style={{
+                height: 0,
+                background: "linear-gradient(to bottom, #FFF7E4, #F0C56D 50%, #D4A94E)",
+                filter: "blur(10px)",
+                opacity: 0.55,
+              }}
+            />
+          </div>
           
           {/* Education items */}
           {educationItems.map((item, index) => (
             <TimelineItem 
-              key={index} 
+              key={item.title} 
               item={item} 
-              index={index} 
+              iconRef={(el) => {
+                iconRefs.current[index] = el;
+              }}
+              glowRef={(el) => {
+                iconGlowRefs.current[index] = el;
+              }}
+              pulseRef={(el) => {
+                iconPulseRefs.current[index] = el;
+              }}
               isEven={index % 2 === 0} 
               isLast={index === educationItems.length - 1}
             />
@@ -145,8 +547,9 @@ export default function EducationSection() {
   );
 }
 
-function TimelineItem({ item, index, isEven, isLast }) {
+function TimelineItem({ item, iconRef, glowRef, pulseRef, isEven, isLast }) {
   const controls = useAnimation();
+  const TimelineIcon = item.icon;
   const [ref, inView] = useInView({
     threshold: 0.2,
     triggerOnce: false
@@ -193,14 +596,27 @@ function TimelineItem({ item, index, isEven, isLast }) {
 
   return (
     <div className={`relative ${isLast ? '' : 'mb-6 md:mb-4'}`} ref={ref}>
-      {/* Timeline emoji - centered on the line for all screen sizes */}
+      {/* Timeline icon - centered on the line for all screen sizes */}
       <motion.div
         initial="hidden"
         animate={controls}
         variants={circleVariants}
-        className="absolute left-4 md:left-1/2 transform -translate-x-1/2 md:-translate-x-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 flex items-center justify-center z-10"
+        className="absolute left-4 md:left-1/2 transform -translate-x-1/2 md:-translate-x-1/2 -translate-y-1/2 z-10"
       >
-        <span className="text-2xl sm:text-3xl md:text-4xl">{item.icon}</span>
+        <div
+          ref={iconRef}
+          className="relative flex h-10 w-10 items-center justify-center overflow-visible rounded-full border border-white/10 bg-white/5 text-white/40 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl transition-colors duration-300 sm:h-12 sm:w-12 md:h-16 md:w-16"
+        >
+          <div
+            ref={glowRef}
+            className="absolute inset-0 rounded-full bg-gradient-to-br from-[#F0C56D]/30 via-[#F6E7BC]/20 to-[#6EA8FF]/30 opacity-0 blur-md"
+          />
+          <div
+            ref={pulseRef}
+            className="absolute inset-0 rounded-full border border-[#F0C56D]/30 opacity-0"
+          />
+          <TimelineIcon className="relative z-10 h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" strokeWidth={1.85} />
+        </div>
       </motion.div>
       
       {/* Content card - full width on mobile, alternating sides on larger screens */}
