@@ -605,7 +605,7 @@ function TimelineItem({ item, iconRef, glowRef, pulseRef, isEven, isLast }) {
       >
         <div
           ref={iconRef}
-          className="relative flex h-10 w-10 items-center justify-center overflow-visible rounded-full border border-white/10 bg-white/5 text-white/40 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl transition-colors duration-300 sm:h-12 sm:w-12 md:h-16 md:w-16"
+          className="relative flex h-8 w-8 items-center justify-center overflow-visible rounded-full border border-white/10 bg-white/5 text-white/40 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl transition-colors duration-300 sm:h-11 sm:w-11 md:h-14 md:w-14"
         >
           <div
             ref={glowRef}
@@ -615,7 +615,7 @@ function TimelineItem({ item, iconRef, glowRef, pulseRef, isEven, isLast }) {
             ref={pulseRef}
             className="absolute inset-0 rounded-full border border-[#F0C56D]/30 opacity-0"
           />
-          <TimelineIcon className="relative z-10 h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" strokeWidth={1.85} />
+          <TimelineIcon className="relative z-10 h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" strokeWidth={1.85} />
         </div>
       </motion.div>
       
